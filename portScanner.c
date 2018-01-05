@@ -101,12 +101,6 @@ int main(int argc, char ** argv)
 	struct sockaddr_in serv_addr;
 	struct hostent *url;
 
-
-	for(int i = 0; i < argc; i++)
-	{
-		printf("%d, is %s\n",i,argv[i]);
-	}
-
 	sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sockfd < 0) {
 		fprintf(stderr, "ERROR: Failed to open socket\n");
@@ -123,16 +117,20 @@ int main(int argc, char ** argv)
 
 	FILE * file = fopen("/home/llp2/Desktop/Assignment/ports.txt", "w");//open log file
 
-	for (unsigned short port = min; port < max; port++)//loop through and scan all ports
+	for (unsigned int port = min; port < max; port++)//loop through and scan all ports
 	{
 			memset(&serv_addr, 0, sizeof(serv_addr));
 			serv_addr.sin_family = AF_INET;
 			memcpy(&serv_addr.sin_addr, url->h_addr, url->h_length);
 			serv_addr.sin_port = htons(port);
 	/* Connect to the server */
-		if (connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) != 0) 
-		{	
-	    		//if the port is open then get information about that port and print it to the log file
+		if (connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0)
+		{		    		
+			printf("Port %d Closed\n", port);
+		}
+		else
+		{
+			//if the port is open then get information about that port and print it to the log file
 	    		char host[128];
 	    		char service[128];
 	    		getnameinfo((struct sockaddr*)&serv_addr, sizeof serv_addr, host, (sizeof host), service, sizeof service, 0);
@@ -144,8 +142,6 @@ int main(int argc, char ** argv)
 	
 			//add to linked list
 			generate_port(port,service);
-			//check that linked list is working, to be used instead of printf.
-			//print_port(p);	    		
 		}
 
   	}
